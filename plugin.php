@@ -4,25 +4,25 @@
 // **
 
 // PLUGIN INFORMATION - This should match what is in plugin.json
-$GLOBALS['plugins']['LogViewer'] = [ // Plugin Name
-	'name' => 'LogViewer', // Plugin Name
+$GLOBALS['plugins']['logviewer'] = [ // Plugin Name
+	'name' => 'logviewer', // Plugin Name
 	'author' => 'jamiedonaldson-tinytechlabuk', // Who wrote the plugin
-	'category' => 'Testing', // One to Two Word Description
+	'category' => 'logviewer', // One to Two Word Description
 	'link' => 'https://github.com/jamiedonaldson-tinytechlabuk/php-ef-log-viewer-plugin', // Link to plugin info
 	'version' => '1.0.0', // SemVer of plugin
 	'image' => 'logo.png', // 1:1 non transparent image for plugin
 	'settings' => true, // does plugin need a settings modal?
-	'api' => '/api/plugin/LogViewer/settings', // api route for settings page, or null if no settings page
+	'api' => '/api/plugin/logviewer/settings', // api route for settings page, or null if no settings page
 ];
 
-class LogViewer extends ib
+class logviewer extends ib
 {
 	public function _pluginGetSettings()
 	{
 		return array(
 			'About' => array (
 				$this->settingsOption('notice', '', ['title' => 'Information', 'body' => '
-				<p>This is an LogViewer plugin.</p>
+				<p>This is an logviewer plugin.</p>
 				<br/>']),
 			),
 			'Plugin Settings' => array(

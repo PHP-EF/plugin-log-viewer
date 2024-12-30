@@ -1,11 +1,11 @@
 <?php
 // **
-// USED TO DEFINE CUSTOM API ROUTES
+// Get LogViewer Plugin Settings
 // **
-$app->get('/plugin/example/settings', function ($request, $response, $args) {
-	$examplePlugin = new examplePlugin();
-	// if ($examplePlugin->auth->checkAccess('ACL-PLUGIN-...')) {
-		$examplePlugin->api->setAPIResponseData($examplePlugin->_pluginGetSettings());
+$app->get('/plugin/logviewer/settings', function ($request, $response, $args) {
+	$logviewerPlugin = new logviewerPlugin();
+	 if ($logviewerPlugin->auth->checkAccess('ACL-Plugin-LogViewer')) {
+		$logviewerPlugin->api->setAPIResponseData($logviewerPlugin->_pluginGetSettings());
 	// }
 	$response->getBody()->write(jsonE($GLOBALS['api']));
 	return $response
