@@ -28,7 +28,7 @@ class logviewer extends ib {
 	}
 
     public function getLogFiles() {
-        return $this->logFiles;
+        return $this->config->get('Plugins', 'logviewer')['Log Files'];
     }
 
 	public function getLogContent($filename) {
