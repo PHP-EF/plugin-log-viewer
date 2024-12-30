@@ -1,6 +1,10 @@
 <?php
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // Define the log files to monitor
-$logFiles = ["php.error.log","packer.txt", "Packer_Powershell_log.txt", "git_pull.txt"]; //,"packer.txt", "Packer_Powershell_log.txt", "git_pull.txt",
+$logFiles = ["php.error.log","packer.txt", "Packer_Powershell_log.txt", "git_pull.txt"];
 
 // Define log paths to check
 $logPaths = [
@@ -12,46 +16,71 @@ $logPaths = [
 function getLogContent($filename) {
     global $logPaths;
     
+    // Security check - prevent directory traversal
+    $filename = basename($filename);
+    
     foreach ($logPaths as $basePath) {
-        $logPath = $basePath . basename($filename);
-        // Debug file path and existence
-        error_log("Checking path: " . $logPath . " - Exists: " . (file_exists($logPath) ? 'yes' : 'no'));
-        if (file_exists($logPath)) {
-            $content = @file_get_contents($logPath);
-            if ($content === false) {
-                error_log("Failed to read file: " . $logPath . " - Error: " . error_get_last()['message']);
+        $logPath = $basePath . $filename;
+        
+        try {
+            if (!is_readable($logPath)) {
+                error_log("File not readable: " . $logPath . " - Current user: " . get_current_user());
                 continue;
             }
-            return htmlspecialchars($content);
+            
+            if (file_exists($logPath)) {
+                $content = @file_get_contents($logPath);
+                if ($content === false) {
+                    $error = error_get_last();
+                    error_log("Failed to read file: " . $logPath . " - Error: " . ($error ? $error['message'] : 'Unknown error'));
+                    continue;
+                }
+                return htmlspecialchars($content);
+            }
+        } catch (Exception $e) {
+            error_log("Exception reading file: " . $logPath . " - " . $e->getMessage());
+            continue;
         }
     }
     
-    // List all files in /mnt/logs for debugging
-    if (is_dir("/mnt/logs")) {
-        $files = scandir("/mnt/logs");
-        error_log("Files in /mnt/logs: " . print_r($files, true));
-    } else {
-        error_log("/mnt/logs is not a directory or not accessible");
+    // Debug information
+    error_log("File access attempt details:");
+    error_log("Requested file: " . $filename);
+    error_log("Current user: " . get_current_user());
+    error_log("Current working directory: " . getcwd());
+    
+    foreach ($logPaths as $basePath) {
+        if (is_dir($basePath)) {
+            $files = @scandir($basePath);
+            error_log("Contents of " . $basePath . ": " . ($files ? implode(", ", $files) : "Could not read directory"));
+        } else {
+            error_log("Directory not accessible: " . $basePath);
+        }
     }
     
-    return "Log file not found in any of the configured paths. Checked: " . implode(", ", array_map(function($path) use ($filename) {
-        return $path . basename($filename);
-    }, $logPaths));
+    return "Log file not found or not readable. Please check PHP error log for details.";
 }
 
 // Handle AJAX requests
 if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
-    header('Content-Type: application/json');
-    $file = isset($_GET['file']) ? $_GET['file'] : '';
-    if (in_array($file, $logFiles)) {
+    try {
+        header('Content-Type: application/json');
+        $file = isset($_GET['file']) ? $_GET['file'] : '';
+        
+        if (!in_array($file, $logFiles)) {
+            throw new Exception('Invalid file specified');
+        }
+        
         echo json_encode([
             'status' => 'success',
             'content' => getLogContent($file)
         ]);
-    } else {
+    } catch (Exception $e) {
+        error_log("Error in AJAX request: " . $e->getMessage());
+        http_response_code(500);
         echo json_encode([
             'status' => 'error',
-            'message' => 'Invalid file specified'
+            'message' => $e->getMessage()
         ]);
     }
     exit;
