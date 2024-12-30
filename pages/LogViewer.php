@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 class LogViewerContent {
-    private static $logFiles = ["php.error.log", "packer.txt", "Packer_Powershell_log.txt", "git_pull.txt"];
+    private static $logFiles = ["php.error.log", "Packer.txt", "Packer_Powershell_log.txt", "Packer_git_pull.txt"];
     private static $logPaths = [
         "/var/www/html/inc/logs/",
         "/mnt/logs/"
