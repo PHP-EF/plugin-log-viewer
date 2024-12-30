@@ -4,7 +4,7 @@ $logFiles = ["packer.txt", "Packer_Powershell_log.txt", "git_pull.txt", "php.err
 
 // Function to safely read log file content
 function getLogContent($filename) {
-    $logPath = __DIR__ . "/../logs/" . basename($filename); // Fixed path to logs directory
+    $logPath = "/var/www/html/inc/logs/" . basename($filename); // Updated path for Docker container
     if (file_exists($logPath)) {
         return htmlspecialchars(file_get_contents($logPath));
     }
