@@ -16,41 +16,30 @@ $GLOBALS['plugins']['Log Viewer'] = [ // Plugin Name
 ];
 
 class logviewer extends ib {
-
-	// private $logFiles = ["php.error.log", "Packer.txt", "Packer_Powershell_log.txt", "Packer_git_pull.txt"];
-    // private $logPaths = [
-    //     "/var/www/html/inc/logs/",
-    //     "/mnt/logs/"
-    // ];
-
 	public function __construct() {
 		parent::__construct();
 	}
 
     public function getLogFilesFromDirectory($fileExtensions = null) {
-		$logFiles = [];
-		$this->config->get('Plugins','Log Viewer')['File Extensions'] ?: ['log','txt'];
-		if (isset($this->config->get('Plugins', 'Log Viewer')['logPaths'])) {
-			$logPaths = $this->config->get('Plugins', 'Log Viewer')['logPaths'];
-			foreach ($logPaths as $logDir) {
-				if (file_exists($logDir)) {
-					$directoryIterator = new RecursiveDirectoryIterator($logDir, FilesystemIterator::SKIP_DOTS);
-					$iteratorIterator = new RecursiveIteratorIterator($directoryIterator);
-					foreach ($iteratorIterator as $info) {
-						if ($fileExtensions) {
-							if (in_array($info->getExtension(), $fileExtensions)) {
-								$logFiles[] = array('name' => $info->getFilename(), 'value' => $info->getPathname());
-							}
-						} else {
+	$logFiles = [];
+	$this->config->get('Plugins','Log Viewer')['File Extensions'] ?: ['log','txt'];
+		$logPaths = $this->getLogPaths();
+		foreach ($logPaths as $logDir) {
+			if (file_exists($logDir)) {
+				$directoryIterator = new RecursiveDirectoryIterator($logDir, FilesystemIterator::SKIP_DOTS);
+				$iteratorIterator = new RecursiveIteratorIterator($directoryIterator);
+				foreach ($iteratorIterator as $info) {
+					if ($fileExtensions) {
+						if (in_array($info->getExtension(), $fileExtensions)) {
 							$logFiles[] = array('name' => $info->getFilename(), 'value' => $info->getPathname());
 						}
+					} else {
+						$logFiles[] = array('name' => $info->getFilename(), 'value' => $info->getPathname());
 					}
 				}
 			}
-			 return $logFiles;
-		} else {
-			return false;
 		}
+			return $logFiles;
 	}
 
     public function getFileExtensions() {
@@ -78,22 +67,46 @@ class logviewer extends ib {
         return $this->config->get('Plugins', 'Log Viewer')['Log Files'] ?? array();
     }
 
-	public function getLogContent($filename) {
-		$logPaths = explode(",", $this->config->get('Plugins', 'Log Viewer')['logPaths']);
-		foreach ($logPaths as $basePath) {
-			$logPath = $basePath . basename($filename);
-			if (file_exists($logPath)){
-				// echo $logPath; //For Debug
-				$this->api->setAPIResponseData(htmlspecialchars(file_get_contents($logPath)));
-				return;
+	public function getLogFilesSplit() {
+        $LogFiles = $this->config->get('Plugins', 'Log Viewer')['Log Files'] ?? array();
+		$LogFilesSplit = [];
+		foreach ($LogFiles as $LogFile) {
+			$LogFileSplit = explode(',',$LogFile);
+			$LogFilesSplit[] = array(
+				"base" => $LogFileSplit[0],
+				"name" => $LogFileSplit[1]
+			);
+		}
+		return $LogFilesSplit;
+    }
+
+	public function getLogPaths() {
+        return $this->config->get('Plugins', 'Log Viewer')['logPaths'] ?? array();
+    }
+
+	private function findLogFullPathByName($array, $name) {
+		foreach ($array as $item) {
+			if ($item['name'] === $name) {
+				$base = rtrim($item['base'], DIRECTORY_SEPARATOR); // Remove trailing slash if it exists
+				return $base . DIRECTORY_SEPARATOR . $item['name'];
 			}
+		}
+		return null; // Return null if the name is not found
+	}
+
+	public function getLogContent($filename) {
+		$logFiles = $this->getLogFilesSplit();
+		$logPath = $this->findLogFullPathByName($logFiles,$filename);
+		if (file_exists($logPath)){
+			// echo $logPath; //For Debug
+			$this->api->setAPIResponseData(htmlspecialchars(file_get_contents($logPath)));
+			return;
 		}
 		$this->api->setAPIResponse('Error','Log file not found in any of the configured paths');
 	}
 
-	public function _pluginGetSettings()
-	{
-		$LogPaths = $this->config->get('Plugins','Log Viewer')['logPaths'] ?? array();
+	public function _pluginGetSettings() {
+		$LogPaths = $this->getLogPaths();
 
 		$LogFiles = $this->getLogFilesFromDirectory($this->config->get('Plugins','Log Viewer')['File Extensions'] ?? null) ?? null;
 		$appendNone = [ "name" => "None", "value" => ""];
@@ -101,9 +114,10 @@ class logviewer extends ib {
 		$logFilesKeyValuePairs[] = $appendNone;
 		if ($LogFiles) {
 			$logFilesKeyValuePairs = array_merge($logFilesKeyValuePairs,array_map(function($item) {
+				$basePath = explode($item['name'],$item['value'])[0];
 				return [
 					"name" => $item['name'],
-					"value" => $item['name']
+					"value" => array($basePath,$item['name'])
 				];
 			}, $LogFiles));
 		}
