@@ -53,19 +53,13 @@ class logviewer extends ib {
 				<br/>']),
 			),
 			'Plugin Settings' => array(
-				$this->settingsOption('auth', 'ACL-READ', ['label' => 'Plugin Read ACL']),
-				$this->settingsOption('auth', 'ACL-WRITE', ['label' => 'Plugin Write ACL']),
-				$this->settingsOption('password', 'Password', ['label' => 'Some Password']),
-				$this->settingsOption('input', 'Config1', ['label' => 'Some option 1']),
-				$this->settingsOption('input', 'Config2', ['label' => 'Some option 2']),
-				$this->settingsOption('blank'),
-				$this->settingsOption('input', 'Config3', ['label' => 'Some option 3']),
-				$this->settingsOption('button', '', ['label' => 'Undo', 'icon' => 'fa fa-undo', 'text' => 'Retrieve', 'attr' => 'onclick="doSomething();"']),
+				$this->settingsOption('auth', 'ACL-LOGVIEWER', ['label' => 'LogViewer Plugin Read ACL'])
 			),
-			'Connection Settings' => array(
-				$this->settingsOption('url', 'URL'),
-				$this->settingsOption('password-alt', 'Token'),
-				$this->settingsOption('select', 'Server', ['label' => 'Preferred Server', 'options' => array(array("name" => 'Option 1', "value" => 'opt1'),array("name" => 'Option 2', "value" => 'opt2'))]),
+			'Directory Settings' => array(
+				$this->settingsOption('input', 'logPaths', ['label' => 'LogViewer Plugin Directory Paths', 'placeholder' => '/var/www/html/inc/logs, /mnt/logs'])
+			),
+			'Log Files Settings' => array(
+				$this->settingsOption('select-multiple', 'Log Files', ['label' => 'Log Files', 'options' => array(array("name" => 'Option 1', "value" => 'opt1'),array("name" => 'Option 2', "value" => 'opt2'))])
 			),
 		);
 	}

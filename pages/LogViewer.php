@@ -113,39 +113,6 @@ if ($logviewer->auth->checkAccess($pluginConfig['ACL-LOGVIEWER'] ?? null) == fal
     </div>
 </div>
 
-<style>
-.log-content {
-    background-color: #1e1e1e;
-    color: #d4d4d4;
-    padding: 15px;
-    border-radius: 5px;
-    overflow-x: auto;
-    max-height: 400px;
-    overflow-y: scroll;
-    font-family: 'Consolas', monospace;
-    font-size: 13px;
-    line-height: 1.4;
-    margin: 0;
-    scroll-behavior: smooth;
-}
-
-.log-container {
-    margin-bottom: 2rem;
-}
-
-.refresh-btn {
-    transition: all 0.2s ease;
-}
-
-.refresh-btn:hover i {
-    transform: rotate(180deg);
-}
-
-.refresh-btn i {
-    margin-right: 5px;
-}
-</style>
-
 <script>
 (function() {
     function forceScrollToBottom(element) {
