@@ -1,14 +1,25 @@
 <?php
 // Define the log files to monitor
-$logFiles = ["php.error.log"]; //,"packer.txt", "Packer_Powershell_log.txt", "git_pull.txt",
+$logFiles = ["php.error.log","packer.txt", "Packer_Powershell_log.txt", "git_pull.txt"]; //,"packer.txt", "Packer_Powershell_log.txt", "git_pull.txt",
+
+// Define log paths to check
+$logPaths = [
+    "/var/www/html/inc/logs/",
+    "/mnt/logs/"
+];
 
 // Function to safely read log file content
 function getLogContent($filename) {
-    $logPath = "/var/www/html/inc/logs/" . basename($filename);
-    if (file_exists($logPath)) {
-        return htmlspecialchars(file_get_contents($logPath));
+    global $logPaths;
+    
+    foreach ($logPaths as $basePath) {
+        $logPath = $basePath . basename($filename);
+        if (file_exists($logPath)) {
+            return htmlspecialchars(file_get_contents($logPath));
+        }
     }
-    return "Log file not found at: " . $logPath;
+    
+    return "Log file not found in any of the configured paths";
 }
 
 // Handle AJAX requests
