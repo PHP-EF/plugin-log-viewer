@@ -4,7 +4,7 @@ $logFiles = ["php.error.log"]; //,"packer.txt", "Packer_Powershell_log.txt", "gi
 
 // Function to safely read log file content
 function getLogContent($filename) {
-    $logPath = "/var/www/html/inc/logs/" . basename($filename); // Updated path for Docker container
+    $logPath = "/var/www/html/inc/logs/" . basename($filename);
     if (file_exists($logPath)) {
         return htmlspecialchars(file_get_contents($logPath));
     }
@@ -50,6 +50,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
             font-size: 13px;
             line-height: 1.4;
             margin: 0;
+            scroll-behavior: smooth;
         }
 
         .log-container {
@@ -113,7 +114,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
                     success: function(response) {
                         if (response.status === 'success') {
                             $(fileElement).text(response.content);
-                            $(fileElement).scrollTop($(fileElement)[0].scrollHeight);
+                            // Force immediate scroll
+                            $(fileElement)[0].scrollTop = $(fileElement)[0].scrollHeight;
+                            
+                            // Double-check scroll after a brief delay to ensure content is fully rendered
+                            setTimeout(function() {
+                                $(fileElement)[0].scrollTop = $(fileElement)[0].scrollHeight;
+                            }, 100);
                         } else {
                             toast("Error", "", response.message, "danger");
                         }
