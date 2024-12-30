@@ -3,7 +3,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-class LogViewer {
+class LogViewerContent {
     private static $logFiles = ["php.error.log", "packer.txt", "Packer_Powershell_log.txt", "git_pull.txt"];
     private static $logPaths = [
         "/var/www/html/inc/logs/",
@@ -72,13 +72,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
         header('Content-Type: application/json');
         $file = isset($_GET['file']) ? $_GET['file'] : '';
         
-        if (!in_array($file, LogViewer::getLogFiles())) {
+        if (!in_array($file, LogViewerContent::getLogFiles())) {
             throw new Exception('Invalid file specified');
         }
         
         echo json_encode([
             'status' => 'success',
-            'content' => LogViewer::getLogContent($file)
+            'content' => LogViewerContent::getLogContent($file)
         ]);
     } catch (Exception $e) {
         error_log("Error in AJAX request: " . $e->getMessage());
@@ -99,7 +99,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
                     <h3 class="card-title">Log Viewer</h3>
                 </div>
                 <div class="card-body">
-                    <?php foreach (LogViewer::getLogFiles() as $file): ?>
+                    <?php foreach (LogViewerContent::getLogFiles() as $file): ?>
                     <div class="log-container mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h4><?php echo htmlspecialchars(str_replace('_', ' ', pathinfo($file, PATHINFO_FILENAME))); ?></h4>
@@ -107,7 +107,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
                                 <i class="fas fa-sync-alt"></i> Refresh
                             </button>
                         </div>
-                        <pre id="<?php echo htmlspecialchars($file); ?>" class="log-content"><?php echo LogViewer::getLogContent($file); ?></pre>
+                        <pre id="<?php echo htmlspecialchars($file); ?>" class="log-content"><?php echo LogViewerContent::getLogContent($file); ?></pre>
                     </div>
                     <?php endforeach; ?>
                 </div>
