@@ -89,59 +89,73 @@ if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
 
 <script>
 (function() {
+    function scrollToBottom(element) {
+        if (element && element.scrollHeight) {
+            element.scrollTop = element.scrollHeight;
+        }
+    }
+
     function refreshLog(fileElement) {
-        const file = $(fileElement).attr('id');
-        const refreshBtn = $(`.refresh-btn[data-file="${file}"]`);
+        const file = fileElement.id;
+        const refreshBtn = document.querySelector(`.refresh-btn[data-file="${file}"]`);
         
-        refreshBtn.prop('disabled', true);
-        refreshBtn.find('i').addClass('fa-spin');
+        if (refreshBtn) {
+            refreshBtn.disabled = true;
+            refreshBtn.querySelector('i').classList.add('fa-spin');
+        }
 
         $.ajax({
-            url: '?action=refresh',
+            url: window.location.pathname + '?action=refresh',
             data: { file: file },
             method: 'GET',
-            success: function(response) {
-                if (response.status === 'success') {
-                    $(fileElement).text(response.content);
-                    
-                    // Force scroll to bottom
-                    const elem = $(fileElement)[0];
-                    if (elem) {
-                        elem.scrollTop = elem.scrollHeight;
-                        // Double-check scroll after content render
-                        requestAnimationFrame(() => {
-                            elem.scrollTop = elem.scrollHeight;
-                        });
-                    }
-                } else {
-                    console.error("Error refreshing log:", response.message);
+            dataType: 'json',
+            success: function(data) {
+                if (data && data.status === 'success' && data.content !== undefined) {
+                    fileElement.textContent = data.content;
+                    scrollToBottom(fileElement);
                 }
             },
-            error: function() {
-                console.error("Failed to refresh log content");
-            },
             complete: function() {
-                refreshBtn.prop('disabled', false);
-                refreshBtn.find('i').removeClass('fa-spin');
+                if (refreshBtn) {
+                    refreshBtn.disabled = false;
+                    refreshBtn.querySelector('i').classList.remove('fa-spin');
+                }
             }
         });
     }
 
-    // Initial load
-    $('.log-content').each(function() {
-        refreshLog(this);
+    // Initial load and setup
+    document.querySelectorAll('.log-content').forEach(function(elem) {
+        refreshLog(elem);
+        
+        // Keep scroll at bottom if already at bottom
+        elem.addEventListener('scroll', function() {
+            const isAtBottom = elem.scrollHeight - elem.scrollTop === elem.clientHeight;
+            if (isAtBottom) {
+                elem.dataset.keepScrolled = 'true';
+            } else {
+                elem.dataset.keepScrolled = 'false';
+            }
+        });
     });
 
     // Setup refresh button clicks
-    $('.refresh-btn').click(function() {
-        const fileId = $(this).data('file');
-        refreshLog($('#' + fileId));
+    document.querySelectorAll('.refresh-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const fileId = this.dataset.file;
+            const logElement = document.getElementById(fileId);
+            if (logElement) {
+                refreshLog(logElement);
+            }
+        });
     });
 
     // Auto refresh every 5 seconds
     setInterval(function() {
-        $('.log-content').each(function() {
-            refreshLog(this);
+        document.querySelectorAll('.log-content').forEach(function(elem) {
+            if (elem.dataset.keepScrolled === 'true') {
+                refreshLog(elem);
+            }
         });
     }, 5000);
 })();
