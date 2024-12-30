@@ -4,7 +4,7 @@
 // **
 $app->get('/plugin/logviewer/settings', function ($request, $response, $args) {
 	$logviewer = new logviewer();
-	 if ($logviewer->auth->checkAccess($logviewer->config->get("Plugins", "logviewer")['ACL-LOGVIEWER'] ?: "ACL-LOGVIEWER")) {
+	 if ($logviewer->auth->checkAccess($logviewer->config->get("Plugins", "Log Viewer")['ACL-LOGVIEWER'] ?? "ACL-LOGVIEWER")) {
 		$logviewer->api->setAPIResponseData($logviewer->_pluginGetSettings());
 	}
 	$response->getBody()->write(jsonE($GLOBALS['api']));
@@ -15,7 +15,7 @@ $app->get('/plugin/logviewer/settings', function ($request, $response, $args) {
 
 $app->get('/plugin/logviewer/tail', function ($request, $response, $args) {
 	$logviewer = new logviewer();
-	 if ($logviewer->auth->checkAccess($logviewer->config->get("Plugins", "logviewer")['ACL-LOGVIEWER'] ?: "ACL-LOGVIEWER")) {
+	 if ($logviewer->auth->checkAccess($logviewer->config->get("Plugins", "Log Viewer")['ACL-LOGVIEWER'] ?? "ACL-LOGVIEWER")) {
 		$data = $request->getQueryParams();
 		if (isset($data['file'])) {
 			$logviewer->getLogContent($data['file']);

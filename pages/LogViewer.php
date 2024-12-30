@@ -1,6 +1,6 @@
 <?php
 $logviewer = new logviewer();
-$pluginConfig = $logviewer->config->get('Plugins','logviewer');
+$pluginConfig = $logviewer->config->get('Plugins','Log Viewer');
 if ($logviewer->auth->checkAccess($pluginConfig['ACL-LOGVIEWER'] ?? null) == false) {
   die();
 };
@@ -96,7 +96,8 @@ if ($logviewer->auth->checkAccess($pluginConfig['ACL-LOGVIEWER'] ?? null) == fal
                     <h3 class="card-title">Log Viewer</h3>
                 </div>
                 <div class="card-body">
-                    <?php foreach ($logviewer->getLogFiles() as $file): ?>
+                    <?php
+                    foreach ($logviewer->getLogFiles() as $file): ?>
                     <div class="log-container mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h4><?php echo htmlspecialchars(str_replace('_', ' ', pathinfo($file, PATHINFO_FILENAME))); ?></h4>

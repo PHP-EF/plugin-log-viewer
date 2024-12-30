@@ -4,7 +4,7 @@
 // **
 
 // PLUGIN INFORMATION - This should match what is in plugin.json
-$GLOBALS['plugins']['logviewer'] = [ // Plugin Name
+$GLOBALS['plugins']['Log Viewer'] = [ // Plugin Name
 	'name' => 'Log Viewer', // Plugin Name
 	'author' => 'jamiedonaldson-tinytechlabuk', // Who wrote the plugin
 	'category' => 'Log Viewer', // One to Two Word Description
@@ -27,16 +27,23 @@ class logviewer extends ib {
 		parent::__construct();
 	}
 
-    public function getLogFilesFromDirectory() {
+    public function getLogFilesFromDirectory($fileExtensions = null) {
 		$logFiles = [];
-		if (isset($this->config->get('Plugins', 'logviewer')['logPaths'])) {
-			$logPaths = explode(",", $this->config->get('Plugins', 'logviewer')['logPaths']);
+		$this->config->get('Plugins','Log Viewer')['File Extensions'] ?: ['log','txt'];
+		if (isset($this->config->get('Plugins', 'Log Viewer')['logPaths'])) {
+			$logPaths = $this->config->get('Plugins', 'Log Viewer')['logPaths'];
 			foreach ($logPaths as $logDir) {
-				$directoryIterator = new RecursiveDirectoryIterator($logDir, FilesystemIterator::SKIP_DOTS);
-				$iteratorIterator = new RecursiveIteratorIterator($directoryIterator);
-				foreach ($iteratorIterator as $info) {
-					if (in_array($info->getExtension(), ['log','txt'])) {
-						$logFiles[] = array('name' => $info->getFilename(), 'value' => $info->getPathname());
+				if (file_exists($logDir)) {
+					$directoryIterator = new RecursiveDirectoryIterator($logDir, FilesystemIterator::SKIP_DOTS);
+					$iteratorIterator = new RecursiveIteratorIterator($directoryIterator);
+					foreach ($iteratorIterator as $info) {
+						if ($fileExtensions) {
+							if (in_array($info->getExtension(), $fileExtensions)) {
+								$logFiles[] = array('name' => $info->getFilename(), 'value' => $info->getPathname());
+							}
+						} else {
+							$logFiles[] = array('name' => $info->getFilename(), 'value' => $info->getPathname());
+						}
 					}
 				}
 			}
@@ -68,11 +75,11 @@ class logviewer extends ib {
     }
 
 	public function getLogFiles() {
-        return $this->config->get('Plugins', 'logviewer')['Log Files'];
+        return $this->config->get('Plugins', 'Log Viewer')['Log Files'] ?? array();
     }
 
 	public function getLogContent($filename) {
-		$logPaths = explode(",", $this->config->get('Plugins', 'logviewer')['logPaths']);
+		$logPaths = explode(",", $this->config->get('Plugins', 'Log Viewer')['logPaths']);
 		foreach ($logPaths as $basePath) {
 			$logPath = $basePath . basename($filename);
 			if (file_exists($logPath)){
@@ -86,9 +93,12 @@ class logviewer extends ib {
 
 	public function _pluginGetSettings()
 	{
-		$LogFiles = $this->getLogFilesFromDirectory() ?? null;
+		$LogPaths = $this->config->get('Plugins','Log Viewer')['logPaths'] ?? array();
+
+		$LogFiles = $this->getLogFilesFromDirectory($this->config->get('Plugins','Log Viewer')['File Extensions'] ?? null) ?? null;
+		$appendNone = [ "name" => "None", "value" => ""];
 		$logFilesKeyValuePairs = [];
-		$logFilesKeyValuePairs[] = [ "name" => "None", "value" => ""];
+		$logFilesKeyValuePairs[] = $appendNone;
 		if ($LogFiles) {
 			$logFilesKeyValuePairs = array_merge($logFilesKeyValuePairs,array_map(function($item) {
 				return [
@@ -97,6 +107,10 @@ class logviewer extends ib {
 				];
 			}, $LogFiles));
 		}
+
+		$FileExtensions = [];
+		$FileExtensions[] = $appendNone;
+		$FileExtensions = array_merge($FileExtensions,$this->getFileExtensions());
 
 		return array(
 			'About' => array (
@@ -108,13 +122,13 @@ class logviewer extends ib {
 				$this->settingsOption('auth', 'ACL-LOGVIEWER', ['label' => 'LogViewer Plugin Read ACL'])
 			),
 			'Directory Settings' => array(
-				$this->settingsOption('input', 'logPaths', ['label' => 'LogViewer Plugin Directory Paths', 'placeholder' => '/var/www/html/inc/logs, /mnt/logs'])
+				$this->settingsOption('input-multiple', 'logPaths', ['label' => 'LogViewer Plugin Directory Paths', 'placeholder' => '/var/www/html/inc/logs/', 'values' => $LogPaths, 'override' => '12'])
+			),
+			'Log Files Extension Settings' => array(
+				$this->settingsOption('select-multiple', 'File Extensions', ['label' => 'Filter Logs By File Extension', 'options' => $FileExtensions])
 			),
 			'Log Files Settings' => array(
 				$this->settingsOption('select-multiple', 'Log Files', ['label' => 'Log Files', 'options' => $logFilesKeyValuePairs])
-			),
-			'Log Files Extension Settings' => array(
-				$this->settingsOption('select-multiple', 'File Extensions', ['label' => 'File Extensions', 'options' => $this->getFileExtensions()])
 			),
 		);
 	}
