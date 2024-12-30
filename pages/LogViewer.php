@@ -89,9 +89,28 @@ if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
 
 <script>
 (function() {
-    function scrollToBottom(element) {
-        if (element && element.scrollHeight) {
-            element.scrollTop = element.scrollHeight;
+    function forceScrollToBottom(element) {
+        if (!element) return;
+        
+        // Try multiple methods to ensure scroll
+        try {
+            // Method 1: Direct scrollTop
+            element.scrollTop = 999999;
+            
+            // Method 2: ScrollIntoView
+            const lastLine = element.lastElementChild || element;
+            lastLine.scrollIntoView({ behavior: 'auto', block: 'end' });
+            
+            // Method 3: Programmatic scroll with animation frame
+            requestAnimationFrame(() => {
+                element.scrollTop = element.scrollHeight;
+                // Double-check scroll after a brief moment
+                setTimeout(() => {
+                    element.scrollTop = element.scrollHeight;
+                }, 50);
+            });
+        } catch (e) {
+            console.error('Scroll error:', e);
         }
     }
 
@@ -111,8 +130,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
             dataType: 'json',
             success: function(data) {
                 if (data && data.status === 'success' && data.content !== undefined) {
+                    // Update content and force scroll
                     fileElement.textContent = data.content;
-                    scrollToBottom(fileElement);
+                    forceScrollToBottom(fileElement);
                 }
             },
             complete: function() {
@@ -124,19 +144,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
         });
     }
 
-    // Initial load and setup
+    // Initial setup
     document.querySelectorAll('.log-content').forEach(function(elem) {
-        refreshLog(elem);
+        // Set initial scroll
+        forceScrollToBottom(elem);
         
-        // Keep scroll at bottom if already at bottom
-        elem.addEventListener('scroll', function() {
-            const isAtBottom = elem.scrollHeight - elem.scrollTop === elem.clientHeight;
-            if (isAtBottom) {
-                elem.dataset.keepScrolled = 'true';
-            } else {
-                elem.dataset.keepScrolled = 'false';
-            }
-        });
+        // Refresh content
+        refreshLog(elem);
     });
 
     // Setup refresh button clicks
@@ -153,9 +167,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
     // Auto refresh every 5 seconds
     setInterval(function() {
         document.querySelectorAll('.log-content').forEach(function(elem) {
-            if (elem.dataset.keepScrolled === 'true') {
-                refreshLog(elem);
-            }
+            refreshLog(elem);
         });
     }, 5000);
 })();
