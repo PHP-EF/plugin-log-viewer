@@ -3,62 +3,67 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Define the log files to monitor
-$logFiles = ["php.error.log","packer.txt", "Packer_Powershell_log.txt", "git_pull.txt"];
+class LogViewer {
+    private static $logFiles = ["php.error.log", "packer.txt", "Packer_Powershell_log.txt", "git_pull.txt"];
+    private static $logPaths = [
+        "/var/www/html/inc/logs/",
+        "/mnt/logs/"
+    ];
 
-// Define log paths to check
-$logPaths = [
-    "/var/www/html/inc/logs/",
-    "/mnt/logs/"
-];
+    public static function getLogFiles() {
+        return self::$logFiles;
+    }
 
-// Function to safely read log file content
-function getLogContent($filename) {
-    global $logPaths;
-    
-    // Security check - prevent directory traversal
-    $filename = basename($filename);
-    
-    foreach ($logPaths as $basePath) {
-        $logPath = $basePath . $filename;
+    public static function getLogContent($filename) {
+        // Security check - prevent directory traversal
+        $filename = basename($filename);
         
-        try {
-            if (!is_readable($logPath)) {
-                error_log("File not readable: " . $logPath . " - Current user: " . get_current_user());
-                continue;
-            }
+        if (empty(self::$logPaths)) {
+            error_log("Log paths array is empty or not defined");
+            return "Configuration error: Log paths not properly defined";
+        }
+
+        foreach (self::$logPaths as $basePath) {
+            $logPath = $basePath . $filename;
             
-            if (file_exists($logPath)) {
-                $content = @file_get_contents($logPath);
-                if ($content === false) {
-                    $error = error_get_last();
-                    error_log("Failed to read file: " . $logPath . " - Error: " . ($error ? $error['message'] : 'Unknown error'));
+            try {
+                if (!is_readable($logPath)) {
+                    error_log("File not readable: " . $logPath . " - Current user: " . get_current_user());
                     continue;
                 }
-                return htmlspecialchars($content);
+                
+                if (file_exists($logPath)) {
+                    $content = @file_get_contents($logPath);
+                    if ($content === false) {
+                        $error = error_get_last();
+                        error_log("Failed to read file: " . $logPath . " - Error: " . ($error ? $error['message'] : 'Unknown error'));
+                        continue;
+                    }
+                    return htmlspecialchars($content);
+                }
+            } catch (Exception $e) {
+                error_log("Exception reading file: " . $logPath . " - " . $e->getMessage());
+                continue;
             }
-        } catch (Exception $e) {
-            error_log("Exception reading file: " . $logPath . " - " . $e->getMessage());
-            continue;
         }
-    }
-    
-    // Debug information
-    error_log("File access attempt details:");
-    error_log("Requested file: " . $filename);
-    error_log("Current user: " . get_current_user());
-    error_log("Current working directory: " . getcwd());
-    
-    foreach ($logPaths as $basePath) {
-        if (is_dir($basePath)) {
-            $files = @scandir($basePath);
-            error_log("Contents of " . $basePath . ": " . ($files ? implode(", ", $files) : "Could not read directory"));
-        } else {
-            error_log("Directory not accessible: " . $basePath);
+        
+        // Debug information
+        error_log("File access attempt details:");
+        error_log("Requested file: " . $filename);
+        error_log("Current user: " . get_current_user());
+        error_log("Current working directory: " . getcwd());
+        
+        foreach (self::$logPaths as $basePath) {
+            if (is_dir($basePath)) {
+                $files = @scandir($basePath);
+                error_log("Contents of " . $basePath . ": " . ($files ? implode(", ", $files) : "Could not read directory"));
+            } else {
+                error_log("Directory not accessible: " . $basePath);
+            }
         }
+        
+        return "Log file not found or not readable. Please check PHP error log for details.";
     }
-    
-    return "Log file not found or not readable. Please check PHP error log for details.";
 }
 
 // Handle AJAX requests
@@ -67,13 +72,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
         header('Content-Type: application/json');
         $file = isset($_GET['file']) ? $_GET['file'] : '';
         
-        if (!in_array($file, $logFiles)) {
+        if (!in_array($file, LogViewer::getLogFiles())) {
             throw new Exception('Invalid file specified');
         }
         
         echo json_encode([
             'status' => 'success',
-            'content' => getLogContent($file)
+            'content' => LogViewer::getLogContent($file)
         ]);
     } catch (Exception $e) {
         error_log("Error in AJAX request: " . $e->getMessage());
@@ -94,7 +99,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
                     <h3 class="card-title">Log Viewer</h3>
                 </div>
                 <div class="card-body">
-                    <?php foreach ($logFiles as $file): ?>
+                    <?php foreach (LogViewer::getLogFiles() as $file): ?>
                     <div class="log-container mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h4><?php echo htmlspecialchars(str_replace('_', ' ', pathinfo($file, PATHINFO_FILENAME))); ?></h4>
@@ -102,7 +107,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
                                 <i class="fas fa-sync-alt"></i> Refresh
                             </button>
                         </div>
-                        <pre id="<?php echo htmlspecialchars($file); ?>" class="log-content"><?php echo getLogContent($file); ?></pre>
+                        <pre id="<?php echo htmlspecialchars($file); ?>" class="log-content"><?php echo LogViewer::getLogContent($file); ?></pre>
                     </div>
                     <?php endforeach; ?>
                 </div>
