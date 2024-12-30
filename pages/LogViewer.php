@@ -1,3 +1,25 @@
+<?php
+// Define the log files to monitor
+$logFiles = ["packer.txt", "Packer_Powershell_log.txt", "git_pull.txt", "php.error.log"];
+
+// Function to safely read log file content
+function getLogContent($filename) {
+    $logPath = __DIR__ . "inc/logs/" . basename($filename);
+    if (file_exists($logPath)) {
+        return htmlspecialchars(file_get_contents($logPath));
+    }
+    return "Log file not found";
+}
+
+// Handle AJAX requests
+if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
+    $file = isset($_GET['file']) ? $_GET['file'] : '';
+    if (in_array($file, $logFiles)) {
+        echo getLogContent($file);
+        exit;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,26 +50,31 @@
             text-align: center;
         }
     </style>
+    <script>
+        function refreshLogs() {
+            const logFiles = <?php echo json_encode($logFiles); ?>;
+            logFiles.forEach(file => {
+                fetch(`?action=refresh&file=${encodeURIComponent(file)}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        const logElement = document.getElementById(file);
+                        logElement.textContent = data;
+                        logElement.scrollTop = logElement.scrollHeight;
+                    })
+                    .catch(error => console.error("Error loading log file:", error));
+            });
+        }
+        setInterval(refreshLogs, 1000);
+        window.onload = refreshLogs;
+    </script>
 </head>
 <body>
     <h1>Log Viewer</h1>
+    <?php foreach ($logFiles as $file): ?>
     <div class="log-container">
-        <h2>Packer Log</h2>
-        <pre id="packer.txt">Loading...</pre>
+        <h2><?php echo htmlspecialchars(str_replace('_', ' ', pathinfo($file, PATHINFO_FILENAME))); ?></h2>
+        <pre id="<?php echo htmlspecialchars($file); ?>"><?php echo getLogContent($file); ?></pre>
     </div>
-    <div class="log-container">
-        <h2>Packer Powershell log</h2>
-        <pre id="Packer_Powershell_log.txt">Loading...</pre>
-    </div>
-    <div class="log-container">
-        <h2>Packer Git Pull log</h2>
-        <pre id="git_pull.txt">Loading...</pre>
-    </div>
-    <div class="log-container">
-        <h2>Portal PHP Log</h2>
-        <pre id="php.error.log">Loading...</pre>
-    </div>
-    <!-- Load the JavaScript file -->
-    <script src="log_viewer.js"></script>
+    <?php endforeach; ?>
 </body>
 </html>
