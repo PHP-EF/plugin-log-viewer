@@ -5,11 +5,11 @@
 
 // PLUGIN INFORMATION - This should match what is in plugin.json
 $GLOBALS['plugins']['logviewer'] = [ // Plugin Name
-	'name' => 'logviewer', // Plugin Name
+	'name' => 'Log Viewer', // Plugin Name
 	'author' => 'jamiedonaldson-tinytechlabuk', // Who wrote the plugin
-	'category' => 'logviewer', // One to Two Word Description
+	'category' => 'Log Viewer', // One to Two Word Description
 	'link' => 'https://github.com/jamiedonaldson-tinytechlabuk/php-ef-log-viewer-plugin', // Link to plugin info
-	'version' => '1.0.0', // SemVer of plugin
+	'version' => '1.0.1', // SemVer of plugin
 	'image' => 'logo.png', // 1:1 non transparent image for plugin
 	'settings' => true, // does plugin need a settings modal?
 	'api' => '/api/plugin/logviewer/settings', // api route for settings page, or null if no settings page
@@ -45,6 +45,27 @@ class logviewer extends ib {
 			return false;
 		}
 	}
+
+    public function getFileExtensions() {
+        $extensions = [];
+        $logFiles = $this->getLogFilesFromDirectory();
+        
+        if ($logFiles) {
+            foreach ($logFiles as $file) {
+                $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+                if (!in_array($extension, $extensions) && !empty($extension)) {
+                    $extensions[] = $extension;
+                }
+            }
+        }
+        
+        return array_map(function($ext) {
+            return [
+                "name" => "." . $ext,
+                "value" => $ext
+            ];
+        }, $extensions);
+    }
 
 	public function getLogFiles() {
         return $this->config->get('Plugins', 'logviewer')['Log Files'];
@@ -92,7 +113,9 @@ class logviewer extends ib {
 			'Log Files Settings' => array(
 				$this->settingsOption('select-multiple', 'Log Files', ['label' => 'Log Files', 'options' => $logFilesKeyValuePairs])
 			),
+			'Log Files Extension Settings' => array(
+				$this->settingsOption('select-multiple', 'File Extensions', ['label' => 'File Extensions', 'options' => $this->getFileExtensions()])
+			),
 		);
 	}
 }
-
