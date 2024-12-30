@@ -137,7 +137,7 @@ if ($logviewer->auth->checkAccess($pluginConfig['ACL-LOGVIEWER'] ?? null) == fal
     transition: all 0.2s ease;
 }
 
-.refresh-btn:hover {
+.refresh-btn:hover i {
     transform: rotate(180deg);
 }
 
