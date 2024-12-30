@@ -1,10 +1,10 @@
 [
     {
-      "name": "LogViewer",
+      "name": "logviewer",
       "repo": "https://github.com/jamiedonaldson-tinytechlabuk/php-ef-log-viewer-plugin",
       "author": "jamiedonaldson-tinytechlabuk",
-      "category": "LogViewer",
-      "description": "LogViewer Plugin",
+      "category": "logviewer",
+      "description": "logviewer Plugin",
       "icon": "https://raw.githubusercontent.com/TehMuffinMoo/php-ef-plugin-example/main/logo.png",
       "contact": "https://github.com/jamiedonaldson-tinytechlabuk/php-ef-log-viewer-plugin/issues",
       "link": "https://github.com/jamiedonaldson-tinytechlabuk/php-ef-log-viewer-plugin",

@@ -11,7 +11,7 @@ $GLOBALS['plugins']['logviewer'] = [ // Plugin Name
 	'link' => 'https://github.com/jamiedonaldson-tinytechlabuk/php-ef-log-viewer-plugin', // Link to plugin info
 	'version' => '1.0.0', // SemVer of plugin
 	'image' => 'logo.png', // 1:1 non transparent image for plugin
-	'settings' => true, // does plugin need a settings modal?
+	'settings' => false, // does plugin need a settings modal?
 	'api' => '/api/plugin/logviewer/settings', // api route for settings page, or null if no settings page
 ];
 
