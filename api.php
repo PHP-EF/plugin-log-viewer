@@ -18,7 +18,7 @@ $app->get('/plugin/logviewer/tail', function ($request, $response, $args) {
 	 if ($logviewer->auth->checkAccess($logviewer->config->get("Plugins", "logviewer")['ACL-LOGVIEWER'] ?: "ACL-LOGVIEWER")) {
 		$data = $request->getQueryParams();
 		if (isset($data['file'])) {
-			$logviewer->getLogContent($file);
+			$logviewer->getLogContent($data['file']);
 		} else {
 			$logviewer->api->setAPIResponse('Error','File not specified');
 		}
