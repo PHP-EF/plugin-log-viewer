@@ -1,9 +1,9 @@
 [
     {
       "name": "LogViewer",
-      "repo": "https://github.com/jamiedonaldson-tinytechlabuk/",
+      "repo": "https://github.com/jamiedonaldson-tinytechlabuk/php-ef-log-viewer-plugin/",
       "author": "jamiedonaldson-tinytechlabuk",
-      "category": "Testing",
+      "category": "LogViewer",
       "description": "LogViewer Plugin",
       "icon": "https://raw.githubusercontent.com/TehMuffinMoo/php-ef-plugin-example/main/logo.png",
       "contact": "https://github.com/jamiedonaldson-tinytechlabuk/",
