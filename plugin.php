@@ -37,6 +37,7 @@ class logviewer extends ib {
 			$logPath = $basePath . basename($filename);
 			if (file_exists($logPath)) {
 				$this->api->setAPIResponseData(htmlspecialchars(file_get_contents($logPath)));
+				return;
 			}
 		}
 		$this->api->setAPIResponse('Error','Log file not found in any of the configured paths');
