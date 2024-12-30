@@ -17,17 +17,32 @@ $GLOBALS['plugins']['logviewer'] = [ // Plugin Name
 
 class logviewer extends ib {
 
-	private $logFiles = ["php.error.log", "Packer.txt", "Packer_Powershell_log.txt", "Packer_git_pull.txt"];
-    private $logPaths = [
-        "/var/www/html/inc/logs/",
-        "/mnt/logs/"
-    ];
+	// private $logFiles = ["php.error.log", "Packer.txt", "Packer_Powershell_log.txt", "Packer_git_pull.txt"];
+    // private $logPaths = [
+    //     "/var/www/html/inc/logs/",
+    //     "/mnt/logs/"
+    // ];
 
 	public function __construct() {
 		parent::__construct();
 	}
 
-    public function getLogFiles() {
+    public function getLogFilesFromDirectory() {
+		$logFiles = [];
+		$logPaths = explode(",", $this->config->get('Plugins', 'logviewer')['logPaths']);
+		foreach ($logPaths as $logDir) {
+    		$directoryIterator = new RecursiveDirectoryIterator($logDir, FilesystemIterator::SKIP_DOTS);
+    		$iteratorIterator = new RecursiveIteratorIterator($directoryIterator);
+    		foreach ($iteratorIterator as $info) {
+        		if (in_array($info->getExtension(), ['log','txt'])) {
+            		$logFiles[] = $info->getPathname();
+				}
+			}
+		}
+ 		return $logFiles;
+	}
+
+	public function getLogFiles() {
         return $this->config->get('Plugins', 'logviewer')['Log Files'];
     }
 
@@ -46,7 +61,7 @@ class logviewer extends ib {
 
 	public function _pluginGetSettings()
 	{
-		$LogFilesNames = $this->getLogFiles() ?? null;
+		$LogFilesNames = $this->getLogFilesFromDirectory() ?? null;
 		$logFilesKeyValuePairs = [];
 		$logFilesKeyValuePairs[] = [ "name" => "None", "value" => ""];
 		if ($LogFilesNames) {
