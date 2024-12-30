@@ -29,17 +29,21 @@ class logviewer extends ib {
 
     public function getLogFilesFromDirectory() {
 		$logFiles = [];
-		$logPaths = explode(",", $this->config->get('Plugins', 'logviewer')['logPaths']);
-		foreach ($logPaths as $logDir) {
-    		$directoryIterator = new RecursiveDirectoryIterator($logDir, FilesystemIterator::SKIP_DOTS);
-    		$iteratorIterator = new RecursiveIteratorIterator($directoryIterator);
-    		foreach ($iteratorIterator as $info) {
-        		if (in_array($info->getExtension(), ['log','txt'])) {
-            		$logFiles[] = array('name' => $info->getFilename(), 'value' => $info->getPathname());
+		if (isset($this->config->get('Plugins', 'logviewer')['logPaths'])) {
+			$logPaths = explode(",", $this->config->get('Plugins', 'logviewer')['logPaths']);
+			foreach ($logPaths as $logDir) {
+				$directoryIterator = new RecursiveDirectoryIterator($logDir, FilesystemIterator::SKIP_DOTS);
+				$iteratorIterator = new RecursiveIteratorIterator($directoryIterator);
+				foreach ($iteratorIterator as $info) {
+					if (in_array($info->getExtension(), ['log','txt'])) {
+						$logFiles[] = array('name' => $info->getFilename(), 'value' => $info->getPathname());
+					}
 				}
 			}
+			 return $logFiles;
+		} else {
+			return false;
 		}
- 		return $logFiles;
 	}
 
 	public function getLogFiles() {
@@ -68,7 +72,7 @@ class logviewer extends ib {
 			$logFilesKeyValuePairs = array_merge($logFilesKeyValuePairs,array_map(function($item) {
 				return [
 					"name" => $item['name'],
-					"value" => $item['value']
+					"value" => $item['name']
 				];
 			}, $LogFiles));
 		}
