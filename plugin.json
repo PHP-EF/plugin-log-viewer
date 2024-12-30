@@ -1,17 +1,17 @@
 [
     {
       "name": "LogViewer",
-      "repo": "https://github.com/jamiedonaldson-tinytechlabuk/php-ef-log-viewer-plugin/",
+      "repo": "https://github.com/jamiedonaldson-tinytechlabuk/php-ef-log-viewer-plugin",
       "author": "jamiedonaldson-tinytechlabuk",
       "category": "LogViewer",
       "description": "LogViewer Plugin",
       "icon": "https://raw.githubusercontent.com/TehMuffinMoo/php-ef-plugin-example/main/logo.png",
-      "contact": "https://github.com/jamiedonaldson-tinytechlabuk/",
-      "link": "https://github.com/jamiedonaldson-tinytechlabuk/",
+      "contact": "https://github.com/jamiedonaldson-tinytechlabuk/php-ef-log-viewer-plugin/issues",
+      "link": "https://github.com/jamiedonaldson-tinytechlabuk/php-ef-log-viewer-plugin",
       "version": "1.0.0",
-      "minimum_php-ef_version": "0.6.0",
-      "release_date": "2024-12-20",
-      "last_updated": "2024-12-24",
+      "minimum_php-ef_version": "0.7.2",
+      "release_date": "2024-12-30",
+      "last_updated": "2024-12-30",
       "github_folder": ""
     }
 ]
