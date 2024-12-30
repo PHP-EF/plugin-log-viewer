@@ -185,7 +185,7 @@ if ($logviewer->auth->checkAccess($pluginConfig['ACL-LOGVIEWER'] ?? null) == fal
         queryAPI("GET","/api/plugin/logviewer/tail?file="+file).done(function(data) {
             if (data["result"] == "Success") {
                 // Update content and force scroll
-                fileElement.textContent = data.content;
+                fileElement.textContent = data.data;
                 forceScrollToBottom(fileElement);
             } else if (data["result"] == "Error") {
                 toast(data["result"],"",data["message"]+": "+file,"danger");
