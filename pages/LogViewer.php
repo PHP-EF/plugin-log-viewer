@@ -14,12 +14,29 @@ function getLogContent($filename) {
     
     foreach ($logPaths as $basePath) {
         $logPath = $basePath . basename($filename);
+        // Debug file path and existence
+        error_log("Checking path: " . $logPath . " - Exists: " . (file_exists($logPath) ? 'yes' : 'no'));
         if (file_exists($logPath)) {
-            return htmlspecialchars(file_get_contents($logPath));
+            $content = @file_get_contents($logPath);
+            if ($content === false) {
+                error_log("Failed to read file: " . $logPath . " - Error: " . error_get_last()['message']);
+                continue;
+            }
+            return htmlspecialchars($content);
         }
     }
     
-    return "Log file not found in any of the configured paths";
+    // List all files in /mnt/logs for debugging
+    if (is_dir("/mnt/logs")) {
+        $files = scandir("/mnt/logs");
+        error_log("Files in /mnt/logs: " . print_r($files, true));
+    } else {
+        error_log("/mnt/logs is not a directory or not accessible");
+    }
+    
+    return "Log file not found in any of the configured paths. Checked: " . implode(", ", array_map(function($path) use ($filename) {
+        return $path . basename($filename);
+    }, $logPaths));
 }
 
 // Handle AJAX requests
