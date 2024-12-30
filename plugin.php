@@ -35,7 +35,8 @@ class logviewer extends ib {
 		
 		foreach ($this->logPaths as $basePath) {
 			$logPath = $basePath . basename($filename);
-			if (file_exists($logPath)) {
+			if (file_exists($logPath)){
+				echo $logPath;
 				$this->api->setAPIResponseData(htmlspecialchars(file_get_contents($logPath)));
 				return;
 			}
