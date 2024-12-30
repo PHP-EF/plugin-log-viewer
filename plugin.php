@@ -46,6 +46,18 @@ class logviewer extends ib {
 
 	public function _pluginGetSettings()
 	{
+		$LogFilesNames = $this->getLogFiles() ?? null;
+		$logFilesKeyValuePairs = [];
+		$logFilesKeyValuePairs[] = [ "name" => "None", "value" => ""];
+		if ($LogFilesNames) {
+			$logFilesKeyValuePairs = array_merge($logFilesKeyValuePairs,array_map(function($item) {
+				return [
+					"name" => $item,
+					"value" => $item
+				];
+			}, $LogFilesNames));
+		}
+
 		return array(
 			'About' => array (
 				$this->settingsOption('notice', '', ['title' => 'Information', 'body' => '
@@ -59,8 +71,9 @@ class logviewer extends ib {
 				$this->settingsOption('input', 'logPaths', ['label' => 'LogViewer Plugin Directory Paths', 'placeholder' => '/var/www/html/inc/logs, /mnt/logs'])
 			),
 			'Log Files Settings' => array(
-				$this->settingsOption('select-multiple', 'Log Files', ['label' => 'Log Files', 'options' => array(array("name" => 'Option 1', "value" => 'opt1'),array("name" => 'Option 2', "value" => 'opt2'))])
+				$this->settingsOption('select-multiple', 'Log Files', ['label' => 'Log Files', 'options' => $logFilesKeyValuePairs])
 			),
 		);
 	}
 }
+
