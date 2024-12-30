@@ -1,95 +1,92 @@
 <?php
+$logviewer = new logviewer();
+$pluginConfig = $logviewer->config->get('Plugins','logviewer');
+if ($logviewer->auth->checkAccess($pluginConfig['ACL-LOGVIEWER'] ?? null) == false) {
+  die();
+};
+
 // Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// error_reporting(E_ALL);
+// ini_set('display_errors', 1);
 
-class LogViewerContent {
-    private static $logFiles = ["php.error.log", "Packer.txt", "Packer_Powershell_log.txt", "Packer_git_pull.txt"];
-    private static $logPaths = [
-        "/var/www/html/inc/logs/",
-        "/mnt/logs/"
-    ];
+// class LogViewerContent {
 
-    public static function getLogFiles() {
-        return self::$logFiles;
-    }
-
-    public static function getLogContent($filename) {
-        // Security check - prevent directory traversal
-        $filename = basename($filename);
+//     public static function getLogContent($filename) {
+//         // Security check - prevent directory traversal
+//         $filename = basename($filename);
         
-        if (empty(self::$logPaths)) {
-            error_log("Log paths array is empty or not defined");
-            return "Configuration error: Log paths not properly defined";
-        }
+//         if (empty(self::$logPaths)) {
+//             error_log("Log paths array is empty or not defined");
+//             return "Configuration error: Log paths not properly defined";
+//         }
 
-        foreach (self::$logPaths as $basePath) {
-            $logPath = $basePath . $filename;
+//         foreach (self::$logPaths as $basePath) {
+//             $logPath = $basePath . $filename;
             
-            try {
-                if (!is_readable($logPath)) {
-                    error_log("File not readable: " . $logPath . " - Current user: " . get_current_user());
-                    continue;
-                }
+//             try {
+//                 if (!is_readable($logPath)) {
+//                     error_log("File not readable: " . $logPath . " - Current user: " . get_current_user());
+//                     continue;
+//                 }
                 
-                if (file_exists($logPath)) {
-                    $content = @file_get_contents($logPath);
-                    if ($content === false) {
-                        $error = error_get_last();
-                        error_log("Failed to read file: " . $logPath . " - Error: " . ($error ? $error['message'] : 'Unknown error'));
-                        continue;
-                    }
-                    return htmlspecialchars($content);
-                }
-            } catch (Exception $e) {
-                error_log("Exception reading file: " . $logPath . " - " . $e->getMessage());
-                continue;
-            }
-        }
+//                 if (file_exists($logPath)) {
+//                     $content = @file_get_contents($logPath);
+//                     if ($content === false) {
+//                         $error = error_get_last();
+//                         error_log("Failed to read file: " . $logPath . " - Error: " . ($error ? $error['message'] : 'Unknown error'));
+//                         continue;
+//                     }
+//                     return htmlspecialchars($content);
+//                 }
+//             } catch (Exception $e) {
+//                 error_log("Exception reading file: " . $logPath . " - " . $e->getMessage());
+//                 continue;
+//             }
+//         }
         
-        // Debug information
-        error_log("File access attempt details:");
-        error_log("Requested file: " . $filename);
-        error_log("Current user: " . get_current_user());
-        error_log("Current working directory: " . getcwd());
+//         // Debug information
+//         error_log("File access attempt details:");
+//         error_log("Requested file: " . $filename);
+//         error_log("Current user: " . get_current_user());
+//         error_log("Current working directory: " . getcwd());
         
-        foreach (self::$logPaths as $basePath) {
-            if (is_dir($basePath)) {
-                $files = @scandir($basePath);
-                error_log("Contents of " . $basePath . ": " . ($files ? implode(", ", $files) : "Could not read directory"));
-            } else {
-                error_log("Directory not accessible: " . $basePath);
-            }
-        }
+//         foreach (self::$logPaths as $basePath) {
+//             if (is_dir($basePath)) {
+//                 $files = @scandir($basePath);
+//                 error_log("Contents of " . $basePath . ": " . ($files ? implode(", ", $files) : "Could not read directory"));
+//             } else {
+//                 error_log("Directory not accessible: " . $basePath);
+//             }
+//         }
         
-        return "Log file not found or not readable. Please check PHP error log for details.";
-    }
-}
+//         return "Log file not found or not readable. Please check PHP error log for details.";
+//     }
+// }
 
-// Handle AJAX requests
-if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
-    try {
-        header('Content-Type: application/json');
-        $file = isset($_GET['file']) ? $_GET['file'] : '';
+// // Handle AJAX requests
+// if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
+//     try {
+//         header('Content-Type: application/json');
+//         $file = isset($_GET['file']) ? $_GET['file'] : '';
         
-        if (!in_array($file, LogViewerContent::getLogFiles())) {
-            throw new Exception('Invalid file specified');
-        }
+//         if (!in_array($file, LogViewerContent::getLogFiles())) {
+//             throw new Exception('Invalid file specified');
+//         }
         
-        echo json_encode([
-            'status' => 'success',
-            'content' => LogViewerContent::getLogContent($file)
-        ]);
-    } catch (Exception $e) {
-        error_log("Error in AJAX request: " . $e->getMessage());
-        http_response_code(500);
-        echo json_encode([
-            'status' => 'error',
-            'message' => $e->getMessage()
-        ]);
-    }
-    exit;
-}
+//         echo json_encode([
+//             'status' => 'success',
+//             'content' => LogViewerContent::getLogContent($file)
+//         ]);
+//     } catch (Exception $e) {
+//         error_log("Error in AJAX request: " . $e->getMessage());
+//         http_response_code(500);
+//         echo json_encode([
+//             'status' => 'error',
+//             'message' => $e->getMessage()
+//         ]);
+//     }
+//     exit;
+// }
 ?>
 <div class="container-fluid">
     <div class="row">
@@ -99,7 +96,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
                     <h3 class="card-title">Log Viewer</h3>
                 </div>
                 <div class="card-body">
-                    <?php foreach (LogViewerContent::getLogFiles() as $file): ?>
+                    <?php foreach ($logviewer->getLogFiles() as $file): ?>
                     <div class="log-container mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h4><?php echo htmlspecialchars(str_replace('_', ' ', pathinfo($file, PATHINFO_FILENAME))); ?></h4>
@@ -107,7 +104,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
                                 <i class="fas fa-sync-alt"></i> Refresh
                             </button>
                         </div>
-                        <pre id="<?php echo htmlspecialchars($file); ?>" class="log-content"><?php echo LogViewerContent::getLogContent($file); ?></pre>
+                        <pre id="<?php echo htmlspecialchars($file); ?>" class="log-content"><?php echo $logviewer->getLogContent($file); ?></pre>
                     </div>
                     <?php endforeach; ?>
                 </div>
@@ -185,23 +182,22 @@ if (isset($_GET['action']) && $_GET['action'] === 'refresh') {
             refreshBtn.querySelector('i').classList.add('fa-spin');
         }
 
-        $.ajax({
-            url: window.location.pathname + '?action=refresh',
-            data: { file: file },
-            method: 'GET',
-            dataType: 'json',
-            success: function(data) {
-                if (data && data.status === 'success' && data.content !== undefined) {
-                    // Update content and force scroll
-                    fileElement.textContent = data.content;
-                    forceScrollToBottom(fileElement);
-                }
-            },
-            complete: function() {
-                if (refreshBtn) {
-                    refreshBtn.disabled = false;
-                    refreshBtn.querySelector('i').classList.remove('fa-spin');
-                }
+        queryAPI("GET","/api/plugin/logviewer/tail?file="+file).done(function(data) {
+            if (data["result"] == "Success") {
+                // Update content and force scroll
+                fileElement.textContent = data.content;
+                forceScrollToBottom(fileElement);
+            } else if (data["result"] == "Error") {
+                toast(data["result"],"",data["message"]+": "+file,"danger");
+            } else {
+                toast("API Error","","Failed to load log file: "+file,"danger","30000");
+            }
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            toast(textStatus,"","Failed to load log file: "+file+".<br>"+jqXHR.status+": "+errorThrown,"danger");
+        }).always(function() {
+            if (refreshBtn) {
+                refreshBtn.disabled = false;
+                refreshBtn.querySelector('i').classList.remove('fa-spin');
             }
         });
     }

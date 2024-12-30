@@ -15,8 +15,33 @@ $GLOBALS['plugins']['logviewer'] = [ // Plugin Name
 	'api' => '/api/plugin/logviewer/settings', // api route for settings page, or null if no settings page
 ];
 
-class logviewer extends ib
-{
+class logviewer extends ib {
+
+	private $logFiles = ["php.error.log", "Packer.txt", "Packer_Powershell_log.txt", "Packer_git_pull.txt"];
+    private $logPaths = [
+        "/var/www/html/inc/logs/",
+        "/mnt/logs/"
+    ];
+
+	public function __construct() {
+		parent::__construct();
+	}
+
+    public function getLogFiles() {
+        return $this->logFiles;
+    }
+
+	public function getLogContent($filename) {
+		
+		foreach ($this->logPaths as $basePath) {
+			$logPath = $basePath . basename($filename);
+			if (file_exists($logPath)) {
+				return htmlspecialchars(file_get_contents($logPath));
+			}
+		}
+		$this->api->setAPIResponse('Error','Log file not found in any of the configured paths');
+	}
+
 	public function _pluginGetSettings()
 	{
 		return array(
