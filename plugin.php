@@ -35,7 +35,7 @@ class logviewer extends ib {
     		$iteratorIterator = new RecursiveIteratorIterator($directoryIterator);
     		foreach ($iteratorIterator as $info) {
         		if (in_array($info->getExtension(), ['log','txt'])) {
-            		$logFiles[] = $info->getPathname();
+            		$logFiles[] = array('name' => $info->getFilename(), 'value' => $info->getPathname());
 				}
 			}
 		}
@@ -47,8 +47,8 @@ class logviewer extends ib {
     }
 
 	public function getLogContent($filename) {
-		
-		foreach ($this->logPaths as $basePath) {
+		$logPaths = explode(",", $this->config->get('Plugins', 'logviewer')['logPaths']);
+		foreach ($logPaths as $basePath) {
 			$logPath = $basePath . basename($filename);
 			if (file_exists($logPath)){
 				// echo $logPath; //For Debug
@@ -61,16 +61,16 @@ class logviewer extends ib {
 
 	public function _pluginGetSettings()
 	{
-		$LogFilesNames = $this->getLogFilesFromDirectory() ?? null;
+		$LogFiles = $this->getLogFilesFromDirectory() ?? null;
 		$logFilesKeyValuePairs = [];
 		$logFilesKeyValuePairs[] = [ "name" => "None", "value" => ""];
-		if ($LogFilesNames) {
+		if ($LogFiles) {
 			$logFilesKeyValuePairs = array_merge($logFilesKeyValuePairs,array_map(function($item) {
 				return [
-					"name" => $item,
-					"value" => $item
+					"name" => $item['name'],
+					"value" => $item['value']
 				];
-			}, $LogFilesNames));
+			}, $LogFiles));
 		}
 
 		return array(
