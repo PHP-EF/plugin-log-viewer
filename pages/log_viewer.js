@@ -1,7 +1,7 @@
 // Define the base path for the log folder
-const logFolderPath = "/path/to/logs/"; // Update this path as needed
+const logFolderPath = "inc/logs/"; // Update this path as needed
 
-const logFiles = ["packer.txt", "Packer_Powershell_log.txt", "git_pull.txt"];
+const logFiles = ["packer.txt", "Packer_Powershell_log.txt", "git_pull.txt", "php.error.log"];
 
 function refreshLogs() {
     logFiles.forEach(file => {

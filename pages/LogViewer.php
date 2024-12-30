@@ -43,6 +43,10 @@
         <h2>Packer Git Pull log</h2>
         <pre id="git_pull.txt">Loading...</pre>
     </div>
+    <div class="log-container">
+        <h2>Portal PHP Log</h2>
+        <pre id="php.error.log">Loading...</pre>
+    </div>
     <!-- Load the JavaScript file -->
     <script src="log_viewer.js"></script>
 </body>
