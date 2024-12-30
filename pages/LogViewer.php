@@ -1,6 +1,6 @@
 <?php
 // Define the log files to monitor
-$logFiles = ["packer.txt", "Packer_Powershell_log.txt", "git_pull.txt", "php.error.log"];
+$logFiles = ["php.error.log"]; //,"packer.txt", "Packer_Powershell_log.txt", "git_pull.txt",
 
 // Function to safely read log file content
 function getLogContent($filename) {
