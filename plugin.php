@@ -136,7 +136,7 @@ class logviewer extends ib {
 				$this->settingsOption('auth', 'ACL-LOGVIEWER', ['label' => 'LogViewer Plugin Read ACL'])
 			),
 			'Directory Settings' => array(
-				$this->settingsOption('input-multiple', 'logPaths', ['label' => 'LogViewer Plugin Directory Paths', 'placeholder' => '/var/www/html/inc/logs/', 'values' => $LogPaths, 'override' => '12'])
+				$this->settingsOption('input-multiple', 'logPaths', ['label' => 'LogViewer Plugin Directory Paths', 'placeholder' => '/var/www/html/inc/logs/', 'values' => $LogPaths, 'override' => '12', 'text' => 'Add'])
 			),
 			'Log Files Extension Settings' => array(
 				$this->settingsOption('select-multiple', 'File Extensions', ['label' => 'Filter Logs By File Extension', 'options' => $FileExtensions])
