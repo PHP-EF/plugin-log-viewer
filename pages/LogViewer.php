@@ -2,7 +2,8 @@
 $logviewer = new logviewer();
 $pluginConfig = $logviewer->config->get('Plugins','Log Viewer');
 if ($logviewer->auth->checkAccess($pluginConfig['ACL-LOGVIEWER'] ?? null) == false) {
-  die();
+    $ib->api->setAPIResponse('Error','Unauthorized',401);
+    return false;
 };
 ?>
 <div class="container-fluid">
