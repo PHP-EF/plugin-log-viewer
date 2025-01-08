@@ -15,7 +15,7 @@ $GLOBALS['plugins']['Log Viewer'] = [ // Plugin Name
 	'api' => '/api/plugin/logviewer/settings', // api route for settings page, or null if no settings page
 ];
 
-class logviewer extends ib {
+class logviewer extends phpef {
 	public function __construct() {
 		parent::__construct();
 	}
